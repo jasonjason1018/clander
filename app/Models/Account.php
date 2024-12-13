@@ -9,6 +9,7 @@ use Mockery\Exception;
 class Account extends Model
 {
     protected $table = 'accounts';
+    protected $primaryKey = 'id_account';
     protected $fillable = [
         'name',
         'email',

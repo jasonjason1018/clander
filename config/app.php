@@ -123,6 +123,10 @@ return [
 
     'cipher' => 'AES-256-CBC',
 
+    'api_extra_cipher_key' => env('API_EXTRA_CIPHER_KEY', "11111111111111111111111111111111"),
+    'api_extra_cipher_method' => env('API_EXTRA_CIPHER_METHOD', 'AES-256-CBC'),
+    'api_extra_cipher_iv' => env('API_EXTRA_CIPHER_IV', '1111111111111111'),
+
     /*
     |--------------------------------------------------------------------------
     | Autoloaded Service Providers
@@ -226,7 +230,7 @@ return [
         'URL' => Illuminate\Support\Facades\URL::class,
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
-
+        'Tool' => \App\Facades\Tool::class,
     ],
 
 ];

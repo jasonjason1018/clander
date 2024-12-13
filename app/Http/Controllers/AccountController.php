@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use Facade\Ignition\Support\Packagist\Package;
 use Illuminate\Http\Request;
 use App\Services\AccountService;
+use Illuminate\Support\Facades\Redis;
 
 class AccountController extends Controller
 {
@@ -35,5 +37,30 @@ class AccountController extends Controller
         $note = $request->input('note', null);
 
         return $accountService->register($name, $email, $password, $note);
+    }
+
+    public function login(Request $request)
+    {
+        $email = $request->input('email', '');
+
+        if (!$email) {
+            throw new \Exception('Email cannot be empty.');
+        }
+
+        $password = $request->input('password', '');
+
+        if (!$password) {
+            throw new \Exception('Password cannot be empty.');
+        }
+
+        $accountService = new AccountService();
+
+        $account = $accountService->validateAccount($email, $password);
+
+        $result = $accountService->getAccessToken($account);
+
+        $this->setRedis($result['access_token']);
+
+        return $result;
     }
 }
