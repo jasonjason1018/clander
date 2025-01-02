@@ -119,4 +119,21 @@ class AccountController extends Controller
 
         return $accountService->getAccountInfo($idAccount);
     }
+
+    public function updateAccountInfo(Request $request)
+    {
+        $idAccount = $request->input('id_account', '');
+
+        $updateData = $request->all();
+
+        unset($updateData['id_account']);
+
+        if (!$idAccount) {
+            throw new \Exception('id_account cannot be empty.');
+        }
+
+        $accountService = new AccountService();
+
+        return $accountService->updateAccountInfo($idAccount, $updateData);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use App\Services\AccountService;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
@@ -102,5 +103,16 @@ abstract class TestCase extends BaseTestCase
     protected function unFreezeTime()
     {
         Carbon::setTestNow();
+    }
+
+    protected function getAccessToken($account)
+    {
+        $accountService = new AccountService();
+
+        $tokenInfo = $accountService->getAccessToken($account);
+
+        Redis::set($tokenInfo['access_token'], true);
+
+        return $tokenInfo['access_token'];
     }
 }

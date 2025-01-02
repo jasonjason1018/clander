@@ -69,17 +69,17 @@ class AccountControllerTest extends TestCase
     {
         $account = Account::find(1);
 
-        $tokenInfo = $this->fakeLogin($account);
+        $token = $this->getAccessToken($account);
 
         $params = [
-            'access_token' => $tokenInfo['access_token'],
+            'access_token' => $token,
         ];
 
         $response = $this->call('POST', '/api/account/refreshToken', $params);
 
         $response->assertStatus(200);
-        $this->assertNotEquals($tokenInfo['access_token'], $response->json()['result']['access_token']);
-        $this->assertNull(Redis::get($tokenInfo['access_token']));
+        $this->assertNotEquals($token, $response->json()['result']['access_token']);
+        $this->assertNull(Redis::get($token));
         $this->assertTrue((boolean)Redis::get($response->json()['result']['access_token']));
     }
 
@@ -87,39 +87,45 @@ class AccountControllerTest extends TestCase
     {
         $account = Account::find(1);
 
-        $tokenInfo = $this->fakeLogin($account);
+        $token = $this->getAccessToken($account);
 
         $params = [
-            'access_token' => $tokenInfo['access_token'],
+            'access_token' => $token,
         ];
 
         $response = $this->call('POST', '/api/account/logout', $params);
 
         $response->assertStatus(200);
-        $this->assertNull(Redis::get($tokenInfo['access_token']));
+        $this->assertNull(Redis::get($token));
     }
 
     public function testGetAccountInfo()
     {
         $account = Account::find(1);
 
-        $tokenInfo = $this->fakeLogin($account);
+        $token = $this->getAccessToken($account);
 
-        $response = $this->withToken($tokenInfo['access_token'], 'Bearer')
+        $response = $this->withToken($token, 'Bearer')
             ->json('GET', '/api/user/me');
 
         $response->assertStatus(200);
         $this->assertEquals($account->toArray(), $response->json()['result']);
     }
 
-    private function fakeLogin($account)
+    public function testUpdateAccountInfo()
     {
-        $accountService = new AccountService();
+        $account = Account::find(1);
 
-        $tokenInfo = $accountService->getAccessToken($account);
+        $token = $this->getAccessToken($account);
 
-        Redis::set($tokenInfo['access_token'], true);
+        $params = [
+            'email' => 'update@xxx.xx'
+        ];
 
-        return $tokenInfo;
+        $response = $this->withToken($token, 'Bearer')
+            ->json('PATCH', '/api/user/me', $params);
+
+        $response->assertStatus(200);
+        $this->assertEquals($params['email'], $account->refresh()->email);
     }
 }

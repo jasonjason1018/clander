@@ -77,4 +77,10 @@ class AccountService
     {
         return Account::find($idAccount);
     }
+
+    public function updateAccountInfo($idAccount, $updateData)
+    {
+        return Account::where('id_account', '=', $idAccount)
+            ->update($updateData);
+    }
 }

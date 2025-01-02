@@ -24,5 +24,6 @@ Route::group(['prefix' => 'account'], function () {
 Route::group(['middleware' => 'token.parse'], function () {
     Route::group(['prefix' => 'user'], function () {
         Route::get('/me', 'AccountController@getAccountInfo');
+        Route::patch('/me', 'AccountController@updateAccountInfo');
     });
 });
