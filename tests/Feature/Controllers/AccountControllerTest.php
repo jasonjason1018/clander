@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Controllers;
 
+use App\Services\AccountService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Redis;
@@ -84,5 +85,25 @@ class AccountControllerTest extends TestCase
         $this->assertNotEquals($tokenInfo['access_token'], $response->json()['result']['access_token']);
         $this->assertNull(Redis::get($tokenInfo['access_token']));
         $this->assertTrue((boolean)Redis::get($response->json()['result']['access_token']));
+    }
+
+    public function testLogout()
+    {
+        $account = Account::find(1);
+
+        $accountService = new AccountService();
+
+        $tokenInfo = $accountService->getAccessToken($account);
+
+        Redis::set($tokenInfo['access_token'], true);
+
+        $params = [
+            'access_token' => $tokenInfo['access_token'],
+        ];
+
+        $response = $this->call('POST', '/api/account/logout', $params);
+
+        $response->assertStatus(200);
+        $this->assertNull(Redis::get($tokenInfo['access_token']));
     }
 }

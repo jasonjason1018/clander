@@ -93,4 +93,17 @@ class AccountController extends Controller
 
         return $result;
     }
+
+    public function logout(Request $request)
+    {
+        $accessToken = $request->input('access_token', '');
+
+        if (!$accessToken) {
+            throw new \Exception('AccessToken cannot be empty.');
+        }
+
+        $this->delRedis($accessToken);
+
+        return true;
+    }
 }
