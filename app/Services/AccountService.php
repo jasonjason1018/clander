@@ -68,8 +68,13 @@ class AccountService
         return $result;
     }
 
-    public function getAccountInfo($accessToken)
+    public function getTokenInfo($accessToken)
     {
         return json_decode(Tool::decryptExtra(Tool::base64UrlDecode($accessToken)), true);
+    }
+
+    public function getAccountInfo($idAccount)
+    {
+        return Account::find($idAccount);
     }
 }

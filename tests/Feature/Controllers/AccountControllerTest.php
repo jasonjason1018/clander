@@ -69,11 +69,7 @@ class AccountControllerTest extends TestCase
     {
         $account = Account::find(1);
 
-        $accountService = new AccountService();
-
-        $tokenInfo = $accountService->getAccessToken($account);
-
-        Redis::set($tokenInfo['access_token'], true);
+        $tokenInfo = $this->fakeLogin($account);
 
         $params = [
             'access_token' => $tokenInfo['access_token'],
@@ -91,11 +87,7 @@ class AccountControllerTest extends TestCase
     {
         $account = Account::find(1);
 
-        $accountService = new AccountService();
-
-        $tokenInfo = $accountService->getAccessToken($account);
-
-        Redis::set($tokenInfo['access_token'], true);
+        $tokenInfo = $this->fakeLogin($account);
 
         $params = [
             'access_token' => $tokenInfo['access_token'],
@@ -105,5 +97,29 @@ class AccountControllerTest extends TestCase
 
         $response->assertStatus(200);
         $this->assertNull(Redis::get($tokenInfo['access_token']));
+    }
+
+    public function testGetAccountInfo()
+    {
+        $account = Account::find(1);
+
+        $tokenInfo = $this->fakeLogin($account);
+
+        $response = $this->withToken($tokenInfo['access_token'], 'Bearer')
+            ->json('GET', '/api/user/me');
+
+        $response->assertStatus(200);
+        $this->assertEquals($account->toArray(), $response->json()['result']);
+    }
+
+    private function fakeLogin($account)
+    {
+        $accountService = new AccountService();
+
+        $tokenInfo = $accountService->getAccessToken($account);
+
+        Redis::set($tokenInfo['access_token'], true);
+
+        return $tokenInfo;
     }
 }

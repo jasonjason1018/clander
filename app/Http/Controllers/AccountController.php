@@ -74,7 +74,7 @@ class AccountController extends Controller
 
         $accountService = new AccountService();
 
-        $accountInfo = $accountService->getAccountInfo($accessToken);
+        $accountInfo = $accountService->getTokenInfo($accessToken);
 
         if (!isset($accountInfo['id_account'])) {
             throw new \Exception('Invalid access token.');
@@ -105,5 +105,18 @@ class AccountController extends Controller
         $this->delRedis($accessToken);
 
         return true;
+    }
+
+    public function getAccountInfo(Request $request)
+    {
+        $idAccount = $request->input('id_account', '');
+
+        if (!$idAccount) {
+            throw new \Exception('id_account cannot be empty.');
+        }
+
+        $accountService = new AccountService();
+
+        return $accountService->getAccountInfo($idAccount);
     }
 }

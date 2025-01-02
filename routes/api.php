@@ -20,3 +20,9 @@ Route::group(['prefix' => 'account'], function () {
     Route::post('/refreshToken', 'AccountController@refreshToken');
     Route::post('/logout', 'AccountController@logout');
 });
+
+Route::group(['middleware' => 'token.parse'], function () {
+    Route::group(['prefix' => 'user'], function () {
+        Route::get('/me', 'AccountController@getAccountInfo');
+    });
+});
