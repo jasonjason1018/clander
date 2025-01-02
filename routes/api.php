@@ -17,4 +17,5 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'account'], function () {
     Route::post('/register', 'AccountController@register');
     Route::post('/login', 'AccountController@login');
+    Route::post('/refreshToken', 'AccountController@refreshToken');
 });

@@ -48,7 +48,6 @@ class AccountControllerTest extends TestCase
 
     public function testLogin()
     {
-        $this->freezeTime('2024-12-16 11:00:00');
         $account = Account::find(1);
 
         $params = [
@@ -59,9 +58,31 @@ class AccountControllerTest extends TestCase
         $response = $this->call('POST', '/api/account/login', $params);
 
         $response->assertStatus(200);
-        
+
         $result = $response->json()['result'];
         $this->assertTrue((boolean)Redis::get($result['access_token']));
         $this->assertEquals(Carbon::now()->addMinute(15)->format('Y-m-d H:i:s'), $response->json()['result']['expired_time']);
+    }
+
+    public function testRefreshToken()
+    {
+        $account = Account::find(1);
+
+        $accountService = new AccountService();
+
+        $tokenInfo = $accountService->getAccessToken($account);
+
+        Redis::set($tokenInfo['access_token'], true);
+
+        $params = [
+            'access_token' => $tokenInfo['access_token'],
+        ];
+
+        $response = $this->call('POST', '/api/account/refreshToken', $params);
+
+        $response->assertStatus(200);
+        $this->assertNotEquals($tokenInfo['access_token'], $response->json()['result']['access_token']);
+        $this->assertNull(Redis::get($tokenInfo['access_token']));
+        $this->assertTrue((boolean)Redis::get($response->json()['result']['access_token']));
     }
 }

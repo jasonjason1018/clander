@@ -18,6 +18,11 @@ class Controller extends BaseController
         Redis::set($key, $value);
     }
 
+    public function delRedis($key)
+    {
+        Redis::del($key);
+    }
+
     public function callAction($method, $parameters)
     {
         $result = $this->{$method}(...array_values($parameters));

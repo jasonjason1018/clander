@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Facade\Ignition\Support\Packagist\Package;
 use Illuminate\Http\Request;
 use App\Services\AccountService;
-use Illuminate\Support\Facades\Redis;
+use App\Models\Account;
 
 class AccountController extends Controller
 {
@@ -59,6 +59,36 @@ class AccountController extends Controller
 
         $result = $accountService->getAccessToken($account);
 
+        $this->setRedis($result['access_token']);
+
+        return $result;
+    }
+
+    public function refreshToken(Request $request)
+    {
+        $accessToken = $request->input('access_token', '');
+
+        if (!$accessToken) {
+            throw new \Exception('AccessToken cannot be empty.');
+        }
+
+        $accountService = new AccountService();
+
+        $accountInfo = $accountService->getAccountInfo($accessToken);
+
+        if (!isset($accountInfo['id_account'])) {
+            throw new \Exception('Invalid access token.');
+        }
+
+        $account = Account::find($accountInfo['id_account']);
+
+        if (!$account) {
+            throw new \Exception('Account not found.');
+        }
+
+        $result = $accountService->getAccessToken($account);
+
+        $this->delRedis($accessToken);
         $this->setRedis($result['access_token']);
 
         return $result;
